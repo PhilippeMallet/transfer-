@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Map Visualization</title>
+    <!-- Use Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Main Map Area -->
+        <main id="map-container">
+            <div id="map-background"></div>
+            <div id="shapes-layer"></div>
+            <svg id="arrows-layer">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="rgba(139,92,246,0.85)" />
+                    </marker>
+                    <marker id="arrowhead-hover" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa" />
+                    </marker>
+                </defs>
+            </svg>
+            <div id="nodes-layer"></div>
+            <!-- Toolbar -->
+            <div id="toolbar">
+                <button id="add-company-fab" title="Add New Company">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                    <span>Company</span>
+                </button>
+                <button id="add-rect-group" title="Add Rectangle Group">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                    </svg>
+                    <span>Rectangle</span>
+                </button>
+                <button id="add-circle-group" title="Add Circle Group">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
+                    <span>Circle</span>
+                </button>
+                <button id="add-arrow-btn" title="Draw Arrow Between Companies">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 19L19 5M19 5H10M19 5v9"></path>
+                    </svg>
+                    <span>Arrow</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- Sidebar Details Panel -->
+        <aside id="details-panel" class="hidden">
+            <div class="panel-header">
+                <h2 id="company-name">Company Name</h2>
+                <div class="panel-header-actions">
+                    <button id="delete-company" class="icon-btn danger" title="Delete Company">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2">
+                            </path>
+                        </svg>
+                    </button>
+                    <button id="close-panel" title="Close Panel">×</button>
+                </div>
+            </div>
+
+            <div class="panel-content">
+                <!-- Financial Metrics (predefined) -->
+                <div class="data-section" id="financial-metrics">
+                    <h3>Financial Metrics</h3>
+                    <div class="metrics-grid" id="metrics-grid">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Custom data sections -->
+                <div class="data-section" id="quantitative-data">
+                    <h3>Quantitative Data</h3>
+                    <div class="data-list"></div>
+                    <button class="add-feature-btn" data-type="quantitative">+ Add Metric</button>
+                </div>
+
+                <div class="data-section" id="qualitative-data">
+                    <h3>Qualitative Data</h3>
+                    <div class="data-list"></div>
+                    <button class="add-feature-btn" data-type="qualitative">+ Add Note</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Feature Add Modal -->
+        <div id="feature-modal" class="hidden">
+            <div class="modal-content">
+                <h3 id="modal-title">Add Feature</h3>
+                <form id="feature-form">
+                    <div class="form-group">
+                        <label for="feature-name">Name</label>
+                        <input type="text" id="feature-name" required placeholder="e.g., Revenue, Description">
+                    </div>
+                    <div class="form-group" id="feature-value-group">
+                        <label for="feature-value">Value</label>
+                        <input type="text" id="feature-value" required placeholder="e.g., $10M, Leading AI startup">
+                        <textarea id="feature-value-text" rows="4" required
+                            placeholder="Enter your note here...&#10;Use Enter for new lines."
+                            style="display:none;"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-feature" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Company Modal -->
+        <div id="company-modal" class="hidden">
+            <div class="modal-content">
+                <h3>Add New Company</h3>
+                <form id="company-form">
+                    <div class="form-group">
+                        <label for="new-company-name">Company Name</label>
+                        <input type="text" id="new-company-name" required placeholder="e.g., Stripe, SpaceX">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-company" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Group Modal -->
+        <div id="group-modal" class="hidden">
+            <div class="modal-content">
+                <h3 id="group-modal-title">Add Group</h3>
+                <form id="group-form">
+                    <div class="form-group">
+                        <label for="group-name">Group Label</label>
+                        <input type="text" id="group-name" required placeholder="e.g., AI Companies, Fintech">
+                    </div>
+                    <div class="form-group">
+                        <label>Color</label>
+                        <div class="color-picker" id="color-picker">
+                            <button type="button" class="color-swatch active" data-color="#3b82f6"
+                                style="background:#3b82f6"></button>
+                            <button type="button" class="color-swatch" data-color="#8b5cf6"
+                                style="background:#8b5cf6"></button>
+                            <button type="button" class="color-swatch" data-color="#06b6d4"
+                                style="background:#06b6d4"></button>
+                            <button type="button" class="color-swatch" data-color="#10b981"
+                                style="background:#10b981"></button>
+                            <button type="button" class="color-swatch" data-color="#f59e0b"
+                                style="background:#f59e0b"></button>
+                            <button type="button" class="color-swatch" data-color="#ef4444"
+                                style="background:#ef4444"></button>
+                            <button type="button" class="color-swatch" data-color="#ec4899"
+                                style="background:#ec4899"></button>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-group" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Arrow Label Modal -->
+        <div id="arrow-modal" class="hidden">
+            <div class="modal-content">
+                <h3>Add Arrow</h3>
+                <p id="arrow-modal-info" style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;"></p>
+                <form id="arrow-form">
+                    <div class="form-group">
+                        <label for="arrow-label">Label (optional)</label>
+                        <input type="text" id="arrow-label" placeholder="e.g., Partnership, Investment">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-arrow" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
