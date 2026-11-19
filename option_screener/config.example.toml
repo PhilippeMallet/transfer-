@@ -1,0 +1,31 @@
+# Copie ce fichier en « config.toml » (même dossier) et adapte-le à chaque PC.
+# config.toml est ignoré par git : chaque PC garde ses propres réglages.
+
+[general]
+source = "yahoo"          # source par défaut : demo | yahoo | ibkr | bloomberg | csv
+ticker = "SPY"
+
+[ibkr]
+host = "127.0.0.1"
+port = 7497               # TWS réel 7496, TWS papier 7497, Gateway réel 4001, Gateway papier 4002
+client_id = 17            # un numéro différent par appli connectée à la même TWS
+donnees_differees = false # true si tu n'as pas l'abonnement OPRA (données ~15 min de retard)
+max_echeances = 12
+max_strikes_par_echeance = 40
+
+[bloomberg]
+host = "localhost"
+port = 8194
+
+[screener]
+type = "both"             # C | P | both
+dte_min = 14
+dte_max = 90
+delta_min = 0.20
+delta_max = 0.70
+modele_vol = "garch"      # garch | ewma | yang-zhang
+seuil_cher = 3.0          # points de vol au-dessus de la vol juste
+seuil_bon_marche = -1.0   # points de vol en dessous
+spread_max_pct = 0.30
+oi_min = 0
+volume_min = 0
