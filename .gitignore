@@ -1,0 +1,6 @@
+# Screener d'options : environnement et réglages propres à chaque PC
+option_screener/.venv/
+option_screener/config.toml
+__pycache__/
+*.pyc
+.pytest_cache/
